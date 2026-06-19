@@ -1,80 +1,96 @@
-# Academic Project Page Template
+# Multi-Agent Collaboration and VLM Action Controllers
 
-> **Update (September 2025)**: This template has been modernized with better design, SEO, and mobile support. For the original version, see the [original-version branch](https://github.com/eliahuhorwitz/Academic-project-page-template/tree/original-version).
+**CS275 Artificial Life — Term Project, Spring 2026**  
+University of California, Los Angeles
 
-A clean, responsive template for academic project pages.
+**Authors:** Athena Mo · Victor Lee · Zhao Xu · Ramnath Kumar
 
+**Live page:** https://f26cs275.github.io/CS275-Project-Page
 
-Example project pages built using this template are:
-- https://horwitz.ai/probex
-- https://vision.huji.ac.il/probegen
-- https://horwitz.ai/mother
-- https://horwitz.ai/spectral_detuning
-- https://vision.huji.ac.il/ladeda
-- https://vision.huji.ac.il/dsire
-- https://horwitz.ai/podd
-- https://dreamix-video-editing.github.io
-- https://horwitz.ai/conffusion
-- https://horwitz.ai/3d_ads/
-- https://vision.huji.ac.il/ssrl_ad
-- https://vision.huji.ac.il/deepsim
+---
 
+## Overview
 
+This repository hosts the project webpage for our CS275 term project. We explore multi-agent collaboration and the use of Vision Language Models (VLMs) as a communication and control layer, built on top of the Unity ML-Agents *Pyramids* reinforcement learning environment.
 
-## Start using the template
-To start using the template click on `Use this Template`.
+**Three contributions:**
 
-The template uses html for controlling the content and css for controlling the style. 
-To edit the websites contents edit the `index.html` file. It contains different HTML "building blocks", use whichever ones you need and comment out the rest.  
+1. **Multi-agent role decomposition with MA-POCA** — Two heterogeneous agents (ButtonPresser and GoldCollector) are trained jointly using Multi-Agent POsthumous Credit Assignment. Role lock is enforced at the Unity collision layer so neither agent can solo the task.
 
-**IMPORTANT!** Make sure to replace the `favicon.ico` under `static/images/` with one of your own, otherwise your favicon is going to be a dreambooth image of me.
+2. **VLM action controller** — The trained PPO policy is replaced with Qwen2.5-VL (7B) running zero-shot via Ollama. The model receives an egocentric camera frame each step and returns a structured JSON with a scene description, high-level command, and low-level action. We find strong perception but poor real-time control (0.03–0.1 Hz vs Unity's 50 Hz physics).
 
-## What's New
+3. **Three-stage curriculum learning** — A scalar `task_difficulty` parameter gates three lessons (gold-only → nearby switch → full task). Automatic advancement via ML-Agents' curriculum API yields a **61.9% win rate vs 18.4%** for the PPO + ICM baseline at matched compute (1.5M steps) — a 3.4× relative improvement.
 
-- Modern, clean design with better mobile support
-- Improved SEO with proper meta tags and structured data
-- Performance improvements (lazy loading, optimized assets)
-- More Works dropdown
-- Copy button for BibTeX citations
-- Better accessibility
+---
 
-## Components
+## Repo structure
 
-- Teaser video
-- Image carousel
-- YouTube video embedding
-- Video carousel
-- PDF poster viewer
-- BibTeX citation
+```
+CS275-Project-Page/
+├── index.html                          # Main project webpage
+├── static/
+│   ├── css/
+│   │   ├── index.css                   # Custom styles
+│   │   ├── bulma.min.css               # Bulma CSS framework
+│   │   ├── bulma-carousel.min.css
+│   │   ├── bulma-slider.min.css
+│   │   └── fontawesome.all.min.css
+│   ├── js/
+│   │   ├── index.js                    # Page interactivity
+│   │   ├── bulma-carousel.min.js
+│   │   └── bulma-slider.min.js
+│   ├── images/
+│   │   ├── carousel1.jpg               # Pyramids environment overview
+│   │   ├── carousel2.jpg               # MA-POCA multi-agent setup
+│   │   ├── carousel3.jpg               # Curriculum reward curves
+│   │   └── carousel4.jpg               # VLM egocentric camera view
+│   ├── videos/
+│   │   ├── banner_video.mp4            # Teaser demo
+│   │   ├── carousel1.mp4               # Multi-agent cooperative episode
+│   │   ├── carousel2.mp4               # VLM controller demo
+│   │   └── carousel3.mp4               # Curriculum learning progression
+│   └── pdfs/
+│       └── CS275_Term_Project_Report.pdf   # Full project report
+└── .github/
+    └── workflows/
+        └── static.yml                  # GitHub Pages auto-deploy
+```
 
-## Customization
+---
 
-The HTML file has TODO comments showing what to replace:
+## Viewing locally
 
-- Paper title, authors, institution, conference
-- Links (arXiv, GitHub, etc.)
-- Abstract and descriptions  
-- Videos, images, and PDFs
-- Related works in the dropdown
-- Meta tags for SEO and social sharing
+No build step required — open `index.html` directly in a browser:
 
-### Meta Tags
-The template includes meta tags for better search engine visibility and social media sharing. These appear in the `<head>` section and help with:
-- Google Scholar indexing
-- Social media previews (Twitter, Facebook, LinkedIn)
-- Search engine optimization
+```bash
+# Python 3 simple server (avoids CORS issues with local videos/PDFs)
+python3 -m http.server 8000
+# then open http://localhost:8000
+```
 
-Create a 1200x630px social preview image at `static/images/social_preview.png`.
+---
 
-## Tips
+## Submission contents
 
-- Compress images with [TinyPNG](https://tinypng.com)
-- Use YouTube for large videos (>10MB)  
-- Replace the favicon in `static/images/`
-- Works with GitHub Pages
+Per the CS275 submission requirements, the zip archive contains:
+
+| Requirement | Location |
+|---|---|
+| Title, authors, abstract | `index.html` hero + abstract sections |
+| Link to project report (PDF) | `index.html` → Paper button; `static/pdfs/CS275_Term_Project_Report.pdf` |
+| Representative images with captions | `index.html` image carousel; `static/images/` |
+| Video demos | `index.html` Videos section; `static/videos/` |
+| Source code link | `index.html` → Code button → GitHub |
+
+---
 
 ## Acknowledgments
-Parts of this project page were adopted from the [Nerfies](https://nerfies.github.io/) page.
 
-## Website License
-<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+We thank Professor Demetri Terzopoulos for instruction in CS275 Artificial Life, and the Unity ML-Agents team for the open-source framework and Pyramids environment.
+
+Page template adapted from the [Academic Project Page Template](https://github.com/eliahuhorwitz/Academic-project-page-template), originally based on [Nerfies](https://nerfies.github.io/).
+
+---
+
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a>  
+This website is licensed under a [Creative Commons Attribution-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-sa/4.0/).
