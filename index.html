@@ -16,10 +16,8 @@
   <meta property="og:title" content="Multi-Agent Collaboration and VLM Action Controllers">
   <meta property="og:description" content="We explore multi-agent collaboration using Vision Language Models (VLM) as a communication layer, built on Unity ML-Agents Pyramids.">
   <meta property="og:url" content="https://f26cs275.github.io/CS275-Project-Page">
-  <meta property="og:image" content="https://f26cs275.github.io/CS275-Project-Page/static/images/carousel1.jpg">
-  <meta property="og:image:width" content="1920">
-  <meta property="og:image:height" content="1080">
-  <meta property="og:image:alt" content="Multi-Agent Collaboration and VLM Action Controllers - Research Preview">
+  <meta property="og:image" content="https://f26cs275.github.io/CS275-Project-Page/static/images/architecture.png">
+  <meta property="og:image:alt" content="VLM action controller architecture: Unity Pyramids → Python bridge → Qwen2.5-VL 7B">
   <meta property="article:published_time" content="2026-06-19T00:00:00.000Z">
   <meta property="article:author" content="Athena Mo">
   <meta property="article:section" content="Research">
@@ -164,10 +162,10 @@
   <div class="container is-max-desktop">
     <div class="hero-body">
       <video poster="" id="tree" autoplay controls muted loop height="100%" preload="metadata">
-        <source src="static/videos/banner_video.mp4" type="video/mp4">
+        <source src="static/videos/curriculum_side_by_side.mp4" type="video/mp4">
       </video>
       <h2 class="subtitle has-text-centered">
-        Two heterogeneous agents — a <strong>ButtonPresser</strong> and a <strong>GoldCollector</strong> — cooperate inside the Unity ML-Agents Pyramids environment. The agents are trained with MA-POCA and a three-stage curriculum, achieving a <strong>3.4× improvement</strong> in win rate over the baseline.
+        <strong>Baseline (left) vs. three-stage curriculum agent (right)</strong> — both trained for 1.5M steps on the Unity ML-Agents Pyramids task. The curriculum agent reliably completes the full behavioral chain while the baseline stagnates, yielding a <strong>3.4× win-rate improvement</strong> (61.9% vs. 18.4%).
       </h2>
     </div>
   </div>
@@ -192,41 +190,107 @@
 <!-- End paper abstract -->
 
 
-<!-- Image carousel -->
-<section class="hero is-small">
+<!-- Results & Key Contributions -->
+<section class="hero is-small" id="results">
   <div class="hero-body">
     <div class="container">
-      <h2 class="title is-3 has-text-centered">Results &amp; Visualizations</h2>
-      <div id="results-carousel" class="carousel results-carousel">
-       <div class="item">
-        <img src="static/images/carousel1.jpg" alt="Unity ML-Agents Pyramids environment overview" loading="lazy"/>
-        <h2 class="subtitle has-text-centered">
-          The Unity ML-Agents <strong>Pyramids</strong> environment. An agent must find and press a hidden switch, wait for a gold pyramid to spawn, knock it over, and reach the gold brick — rewarded only on full task completion.
-        </h2>
+      <h2 class="title is-3 has-text-centered">Results &amp; Key Contributions</h2>
+
+      <!-- ── 1. VLM Architecture ── -->
+      <h3 class="title is-5" style="margin-top:1.5rem;">1 &mdash; VLM Action Controller</h3>
+      <div class="columns is-centered">
+        <div class="column is-four-fifths">
+          <div style="background:var(--background-accent); border-radius:var(--border-radius-lg); border:1px solid var(--border-color); padding:1.5rem; box-shadow:var(--shadow-lg);">
+            <img src="static/images/architecture.png"
+                 alt="VLM action controller architecture: Unity Pyramids agent sends camera frame to a Python bridge, which relays to Qwen2.5-VL 7B running on Ollama"
+                 style="width:100%; border-radius:8px; display:block;"
+                 loading="lazy">
+          </div>
+          <p class="subtitle has-text-centered" style="margin-top:1rem; font-size:0.95rem;">
+            <strong>Fig. 1 — VLM control loop.</strong> At each step the Unity environment captures an egocentric camera frame and sends it over HTTP to a Python bridge, which constructs a natural-language prompt and queries <strong>Qwen2.5-VL 7B</strong> running locally via Ollama. The model returns a structured JSON object (scene description, high-level command, low-level action) that the bridge forwards back as a discrete action. The mismatch between Unity's 50 Hz physics and the model's 10–30 s inference time is the central bottleneck explored in Section 3.
+          </p>
+        </div>
       </div>
-      <div class="item">
-        <img src="static/images/carousel2.jpg" alt="MA-POCA multi-agent training results" loading="lazy"/>
-        <h2 class="subtitle has-text-centered">
-          <strong>MA-POCA multi-agent training</strong>: role-decomposed ButtonPresser and GoldCollector agents trained jointly with a centralized value function. Role lock is enforced at the Unity collision layer to prevent policy collapse.
-        </h2>
+
+      <!-- ── 2. Multi-Agent Role Decomposition ── -->
+      <h3 class="title is-5" style="margin-top:3rem;">2 &mdash; Multi-Agent Role Decomposition (MA-POCA)</h3>
+      <div class="columns is-centered" style="margin-top:1rem;">
+        <div class="column is-one-third">
+          <div style="background:var(--background-accent); border-radius:var(--border-radius-lg); padding:1.5rem; border-left:4px solid var(--primary-color); height:100%;">
+            <p style="font-size:1.4rem; margin-bottom:0.5rem;">🔘</p>
+            <p style="font-weight:700; margin-bottom:0.5rem;">ButtonPresser (π<sub>B</sub>)</p>
+            <p style="color:var(--text-secondary); font-size:0.95rem;">The only agent that can flip the hidden switch. Role lock is enforced at Unity's collision layer — the switch script returns early for any non-<code>buttonPresser</code> tag.</p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div style="background:var(--background-accent); border-radius:var(--border-radius-lg); padding:1.5rem; border-left:4px solid #f59e0b; height:100%;">
+            <p style="font-size:1.4rem; margin-bottom:0.5rem;">🏆</p>
+            <p style="font-weight:700; margin-bottom:0.5rem;">GoldCollector (π<sub>C</sub>)</p>
+            <p style="color:var(--text-secondary); font-size:0.95rem;">The only agent that can end the episode by touching the gold brick. Neither agent can solo the task — both must coordinate to earn the shared team reward.</p>
+          </div>
+        </div>
+        <div class="column is-one-third">
+          <div style="background:var(--background-accent); border-radius:var(--border-radius-lg); padding:1.5rem; border-left:4px solid #10b981; height:100%;">
+            <p style="font-size:1.4rem; margin-bottom:0.5rem;">🤝</p>
+            <p style="font-weight:700; margin-bottom:0.5rem;">MA-POCA Training</p>
+            <p style="color:var(--text-secondary); font-size:0.95rem;">Centralized training, decentralized execution. A shared value function V<sub>team</sub>(s<sub>B</sub>, s<sub>C</sub>) is trained jointly; at execution each policy sees only its own observations.</p>
+          </div>
+        </div>
       </div>
-      <div class="item">
-        <img src="static/images/carousel3.jpg" alt="Curriculum learning reward curves" loading="lazy"/>
-        <h2 class="subtitle has-text-centered">
-          <strong>Curriculum learning reward curves</strong>: cumulative reward over 1.5M steps. The curriculum (blue) shows two inflection points at lesson transitions (L0→L1 at 340k, L1→L2 at 430k steps) and climbs into positive reward while the baseline (orange) stagnates near −0.5.
-        </h2>
+
+      <!-- ── 3. Curriculum Learning Results ── -->
+      <h3 class="title is-5" style="margin-top:3rem;">3 &mdash; Curriculum Learning Results</h3>
+      <div class="columns is-centered" style="margin-top:1rem;">
+        <div class="column is-half">
+          <img src="static/videos/baseline_demo.gif"
+               alt="Baseline PPO+ICM agent — times out frequently at 1.5M steps"
+               style="width:100%; border-radius:12px; box-shadow:var(--shadow-md);"
+               loading="lazy">
+          <div style="text-align:center; margin-top:0.75rem;">
+            <span style="display:inline-block; background:#fee2e2; color:#dc2626; font-weight:700; padding:0.25rem 0.75rem; border-radius:999px; font-size:0.85rem; margin-bottom:0.5rem;">Baseline PPO+ICM</span>
+            <p style="color:var(--text-secondary); font-size:0.95rem;">Win rate <strong>18.4%</strong> at 1.5M steps. The terminal-only reward provides too little signal to bootstrap the 4-step behavioral chain; the agent spends most of training timing out at r ≈ −0.5.</p>
+          </div>
+        </div>
+        <div class="column is-half">
+          <img src="static/videos/curriculum_demo.gif"
+               alt="Three-stage curriculum agent — 61.9% win rate at 1.5M steps"
+               style="width:100%; border-radius:12px; box-shadow:var(--shadow-md);"
+               loading="lazy">
+          <div style="text-align:center; margin-top:0.75rem;">
+            <span style="display:inline-block; background:#dcfce7; color:#16a34a; font-weight:700; padding:0.25rem 0.75rem; border-radius:999px; font-size:0.85rem; margin-bottom:0.5rem;">Three-Stage Curriculum</span>
+            <p style="color:var(--text-secondary); font-size:0.95rem;">Win rate <strong>61.9%</strong> at matched compute — a <strong>3.4× improvement</strong>. Two lesson transitions visible at 340k (L0→L1) and 430k (L1→L2) steps as the agent progressively learns each sub-skill.</p>
+          </div>
+        </div>
       </div>
-      <div class="item">
-        <img src="static/images/architecture.png" alt="VLM action controller egocentric camera view" loading="lazy"/>
-        <h2 class="subtitle has-text-centered">
-          <strong>VLM action controller architecture</strong>: the agent's 384×384 egocentric camera feed fed to Qwen2.5-VL (7B). The VLM produces structured JSON with scene descriptions, high-level commands, and low-level actions — revealing strong perception but limited real-time control at 0.03–0.1 Hz.
-        </h2>
+
+      <!-- Key numbers callout -->
+      <div class="columns is-centered" style="margin-top:2rem;">
+        <div class="column is-four-fifths">
+          <div style="background:linear-gradient(135deg,#eff6ff,#dbeafe); border-radius:var(--border-radius-lg); padding:1.75rem 2rem; display:flex; justify-content:space-around; flex-wrap:wrap; gap:1rem; box-shadow:var(--shadow-sm); border:1px solid #bfdbfe;">
+            <div style="text-align:center;">
+              <p style="font-size:2rem; font-weight:800; color:var(--primary-color); line-height:1;">3.4×</p>
+              <p style="color:var(--text-secondary); font-size:0.9rem; margin-top:0.25rem;">win-rate improvement</p>
+            </div>
+            <div style="text-align:center;">
+              <p style="font-size:2rem; font-weight:800; color:#16a34a; line-height:1;">61.9%</p>
+              <p style="color:var(--text-secondary); font-size:0.9rem; margin-top:0.25rem;">curriculum win rate</p>
+            </div>
+            <div style="text-align:center;">
+              <p style="font-size:2rem; font-weight:800; color:#dc2626; line-height:1;">18.4%</p>
+              <p style="color:var(--text-secondary); font-size:0.9rem; margin-top:0.25rem;">baseline win rate</p>
+            </div>
+            <div style="text-align:center;">
+              <p style="font-size:2rem; font-weight:800; color:#7c3aed; line-height:1;">1.5M</p>
+              <p style="color:var(--text-secondary); font-size:0.9rem; margin-top:0.25rem;">training steps (matched)</p>
+            </div>
+          </div>
+        </div>
       </div>
+
     </div>
   </div>
-</div>
 </section>
-<!-- End image carousel -->
+<!-- End Results & Key Contributions -->
 
 
 <!-- Video demos -->
@@ -235,40 +299,107 @@
     <div class="container">
       <h2 class="title is-3">Video Demos</h2>
 
+      <!-- ── 1. Curriculum vs Baseline ── -->
+      <h3 class="title is-5" style="margin-top:1.5rem; margin-bottom:0.5rem;">Curriculum Learning vs. Baseline</h3>
+      <p class="has-text-centered" style="margin-bottom:1.5rem; color:var(--text-secondary);">
+        Agent behavior at 1.5M training steps. The curriculum decomposes the sparse-reward task into three lessons (gold-only → nearby switch → full task), enabling a 3.4× win-rate improvement.
+      </p>
+
       <div class="columns is-centered">
-        <div class="column is-four-fifths">
-          <p class="has-text-centered" style="margin-bottom: 2rem; color: var(--text-secondary);">
-            Recorded episodes from the Unity ML-Agents Pyramids environment showing multi-agent cooperation, VLM-controlled navigation, and curriculum training progression.
+        <div class="column is-half">
+          <img src="static/videos/baseline_demo.gif"
+               alt="Baseline PPO+ICM agent demo"
+               style="width:100%; border-radius:12px; box-shadow:var(--shadow-md);">
+          <p class="has-text-centered" style="margin-top:0.75rem;">
+            <strong>Baseline PPO+ICM</strong> — 18.4% win rate at 1.5M steps. The agent frequently times out without completing the 4-step behavioral chain.
+          </p>
+        </div>
+        <div class="column is-half">
+          <img src="static/videos/curriculum_demo.gif"
+               alt="Curriculum-trained agent demo"
+               style="width:100%; border-radius:12px; box-shadow:var(--shadow-md);">
+          <p class="has-text-centered" style="margin-top:0.75rem;">
+            <strong>Three-stage curriculum</strong> — 61.9% win rate at matched compute. The agent reliably presses the switch, triggers the pyramid spawn, and reaches the gold brick.
           </p>
         </div>
       </div>
 
-      <div class="columns is-multiline is-centered">
-        <div class="column is-half">
+      <div class="columns is-centered" style="margin-top:1rem;">
+        <div class="column is-four-fifths">
           <div class="publication-video">
-            <video controls muted loop preload="metadata" style="position:absolute;top:0;left:0;width:100%;height:100%;border-radius:12px;">
-              <source src="static/videos/carousel1.mp4" type="video/mp4">
+            <video autoplay controls muted loop preload="metadata"
+                   style="position:absolute;top:0;left:0;width:100%;height:100%;border-radius:12px;">
+              <source src="static/videos/curriculum_success.mp4" type="video/mp4">
             </video>
           </div>
-          <p class="has-text-centered" style="margin-top:1rem; font-weight:500;">Multi-Agent Cooperative Episode</p>
+          <p class="has-text-centered" style="margin-top:0.75rem;">
+            <strong>Successful curriculum episode</strong> — the agent presses the switch (spawning the gold pyramid), knocks it over, and reaches the gold brick for the +2 terminal reward.
+          </p>
+        </div>
+      </div>
+
+      <!-- ── 2. Full Training Runs ── -->
+      <h3 class="title is-5" style="margin-top:3rem; margin-bottom:0.5rem;">Full Training Runs (1.5M Steps)</h3>
+      <p class="has-text-centered" style="margin-bottom:1.5rem; color:var(--text-secondary);">
+        Complete recorded training sessions. The curriculum run shows two visible inflection points at the L0→L1 (340k) and L1→L2 (430k) lesson transitions.
+      </p>
+
+      <div class="columns is-centered">
+        <div class="column is-half">
+          <div class="publication-video">
+            <video controls preload="none"
+                   style="position:absolute;top:0;left:0;width:100%;height:100%;border-radius:12px;">
+              <source src="static/videos/baseline_1M5.mp4" type="video/mp4">
+            </video>
+          </div>
+          <p class="has-text-centered" style="margin-top:0.75rem;">
+            <strong>Baseline training (1.5M steps)</strong> — reward stagnates near −0.5 throughout. The terminal-only reward signal is too sparse to bootstrap the 4-step chain from scratch.
+          </p>
         </div>
         <div class="column is-half">
           <div class="publication-video">
-            <video controls muted loop preload="metadata" style="position:absolute;top:0;left:0;width:100%;height:100%;border-radius:12px;">
+            <video controls preload="none"
+                   style="position:absolute;top:0;left:0;width:100%;height:100%;border-radius:12px;">
+              <source src="static/videos/curriculum_1M5.mp4" type="video/mp4">
+            </video>
+          </div>
+          <p class="has-text-centered" style="margin-top:0.75rem;">
+            <strong>Curriculum training (1.5M steps)</strong> — two inflection points at lesson transitions (L0→L1 at 340k, L1→L2 at 430k steps), then steady climb into positive reward.
+          </p>
+        </div>
+      </div>
+
+      <!-- ── 3. VLM Action Controller ── -->
+      <h3 class="title is-5" style="margin-top:3rem; margin-bottom:0.5rem;">VLM Action Controller</h3>
+      <p class="has-text-centered" style="margin-bottom:1.5rem; color:var(--text-secondary);">
+        Qwen2.5-VL (7B) replaces the trained PPO policy as a zero-shot controller. The model receives an egocentric camera frame each step and returns structured JSON with scene description, high-level command, and low-level action.
+      </p>
+
+      <div class="columns is-centered">
+        <div class="column is-half">
+          <div class="publication-video">
+            <video autoplay controls muted loop preload="metadata"
+                   style="position:absolute;top:0;left:0;width:100%;height:100%;border-radius:12px;">
               <source src="static/videos/vlmagent.mp4" type="video/mp4">
             </video>
           </div>
-          <p class="has-text-centered" style="margin-top:1rem; font-weight:500;">VLM Action Controller Demo</p>
+          <p class="has-text-centered" style="margin-top:0.75rem;">
+            <strong>Single-agent VLM controller</strong> — perception is the strong half: the model reliably names corridors, walls, and the switch in its <code>scene_description</code>. Acting on that understanding is where it breaks down, with 10–30s decision latency vs. Unity's 50 Hz physics.
+          </p>
         </div>
         <div class="column is-half">
           <div class="publication-video">
-            <video controls muted loop preload="metadata" style="position:absolute;top:0;left:0;width:100%;height:100%;border-radius:12px;">
-              <source src="static/videos/carousel3.mp4" type="video/mp4">
+            <video autoplay controls muted loop preload="metadata"
+                   style="position:absolute;top:0;left:0;width:100%;height:100%;border-radius:12px;">
+              <source src="static/videos/vlm_simul_multi_agent.mp4" type="video/mp4">
             </video>
           </div>
-          <p class="has-text-centered" style="margin-top:1rem; font-weight:500;">Curriculum Learning Progression</p>
+          <p class="has-text-centered" style="margin-top:0.75rem;">
+            <strong>VLM multi-agent simulation</strong> — the VLM processes joint observations from both the ButtonPresser and GoldCollector, generating natural-language sub-goals that serve as the interpretable communication channel between agents.
+          </p>
         </div>
       </div>
+
     </div>
   </div>
 </section>

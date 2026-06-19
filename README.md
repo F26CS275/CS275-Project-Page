@@ -45,10 +45,14 @@ CS275-Project-Page/
 │   │   ├── carousel3.jpg               # Curriculum reward curves
 │   │   └── carousel4.jpg               # VLM egocentric camera view
 │   ├── videos/
-│   │   ├── banner_video.mp4            # Teaser demo
-│   │   ├── carousel1.mp4               # Multi-agent cooperative episode
-│   │   ├── carousel2.mp4               # VLM controller demo
-│   │   └── carousel3.mp4               # Curriculum learning progression
+│   │   ├── curriculum_side_by_side.mp4 # Teaser: baseline vs curriculum side-by-side
+│   │   ├── curriculum_success.mp4      # A complete successful curriculum episode
+│   │   ├── curriculum_demo.gif         # Curriculum agent behavior loop (short)
+│   │   ├── baseline_demo.gif           # Baseline agent behavior loop (short)
+│   │   ├── curriculum_1M5.mp4          # Full curriculum training run (1.5M steps)
+│   │   ├── baseline_1M5.mp4            # Full baseline training run (1.5M steps)
+│   │   ├── vlmagent.mp4                # Single-agent VLM controller demo
+│   │   └── vlm_simul_multi_agent.mp4   # VLM multi-agent simulation
 │   └── pdfs/
 │       └── CS275_Term_Project_Report.pdf   # Full project report
 └── .github/
